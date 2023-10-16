@@ -20,8 +20,13 @@ async function fetchData() {
             throw new Error('Network response was not ok');
         }
         const json = await response.json();
-        const data = json.results[0].shape.geometry.coordinates[0];
-        console.log(data)
+        //console.log(json)
+        const data = json.results
+        //.forEach((element, index) => {
+        //     return (element.shape.geometry.coordinates[index])
+        // });
+        //json.results[0].shape.geometry.coordinates[0];
+        //console.log(data)
         return data;
     } catch (error) {
         console.error('An error occurred:', error);
@@ -29,11 +34,19 @@ async function fetchData() {
     }
 }
 let data = fetchData();
-console.log(macarte)
+//console.log(macarte)
 dataResult = data.then(
     results => {
-        results.forEach(element => {
-            L.marker([element[1], element[0]]).addTo(macarte);
+        //console.log(results)
+        // Retourne un tableau avec pour chaque index une ligne de transport
+        var dataLigne = results.map(element => {
+            console.log(element)
+            return (element)
+        })
+        console.log(dataLigne)
+        dataLigne.forEach((element, index) => {
+            (element.shape.geometry.coordinates[0].forEach((element) => L.marker([element[1], element[0]]).addTo(macarte)))
+            //L.marker([element.shape.geometry.coordinates[1], element[index][0]]).addTo(macarte);
         });
 
     })
@@ -42,14 +55,14 @@ dataResult = data.then(
 
 // Init la map
 function initMap() {
-    console.log(lat, lon)
+    //console.log(lat, lon)
     macarte = L.map('map').setView([lat, lon], 11);
     L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
         attribution: 'données © <a href="//osm.org/copyright">OpenStreetMap</a>/ODbL - rendu <a href="//openstreetmap.fr">OSM France</a>',
         minZoom: 1,
         maxZoom: 20
     }).addTo(macarte);
-    console.log(macarte)
+    //console.log(macarte)
     //var marker = L.marker([lat, lon]).addTo(macarte);
 }
 
