@@ -1,4 +1,5 @@
-import { fetchData } from './modules/appelModule.mjs';
+import { fetchCircuits, fetchStops } from './modules/appelModule.mjs';
+import { cleanCircuits, cleanStops } from './modules/cleanStop.js';
 // Appel a la base
 // fetch('https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_tan-arrets/records?limit=100&route_type=Bus')
 //     .then((response) => response.json())
@@ -14,9 +15,12 @@ var lon = -1.5517514314893301;
 initMap()
 
 
-let data = fetchData();
+let data = fetchCircuits();
+let data2 = fetchStops();
 
-dataResult = data.then(
+cleanStops();
+cleanCircuits();
+let dataResult = data.then(
     results => {
         //console.log(results)
         // Retourne un tableau avec pour chaque index une ligne de transport
@@ -25,15 +29,16 @@ dataResult = data.then(
         })
         var newArray;
         dataLigne.forEach(element => {
-            console.log(element);
+            // console.log(element);
             const tabToConvert = element.shape.geometry.coordinates;
-            console.log(tabToConvert)
+            // console.log(tabToConvert)
             const tabConverted = flatAndSort(tabToConvert);
             [...newArray] = tabConverted;
 
 
         });
         console.log(newArray)
+        // console.log(newArray)
         //const newArray = flatAndSort(dataLigne[0].shape.geometry.coordinates)
         //console.log(dataLigne[0])
 
@@ -53,6 +58,7 @@ dataResult = data.then(
         //     const newArray = sortedCoordinates.filter((element, index) => index % 2 === 0);
         //     console.log(newArray)
         //console.log(newArray)
+
         newArray.forEach((element) => L.marker([element[1], element[0]]).addTo(macarte));
     });
 
