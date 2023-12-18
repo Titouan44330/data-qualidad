@@ -17,12 +17,11 @@ initMap()
 
 let data = fetchCircuits();
 let data2 = fetchStops();
-
-cleanStops();
+cleanStops(L, macarte); 
 cleanCircuits();
 let dataResult = data.then(
     results => {
-        //console.log(results)
+        console.log(results)
         // Retourne un tableau avec pour chaque index une ligne de transport
         var dataLigne = results.map(element => {
             return (element)
@@ -37,7 +36,6 @@ let dataResult = data.then(
 
 
         });
-        console.log(newArray)
         // console.log(newArray)
         //const newArray = flatAndSort(dataLigne[0].shape.geometry.coordinates)
         //console.log(dataLigne[0])

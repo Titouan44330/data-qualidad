@@ -1,6 +1,6 @@
 import { fetchStops, fetchCircuits } from "./appelModule.mjs";
 
-export async function cleanStops() {
+export async function cleanStops(L, macarte) {
     let stopsUnclean = await fetchStops();
 
     const cleanedData = stopsUnclean.map(item => ({
@@ -8,7 +8,7 @@ export async function cleanStops() {
         stop_name: item.stop_name,
         stop_coordinates: item.stop_coordinates
     }));
-
+    cleanedData.forEach((element) => L.marker([element.stop_coordinates.lat, element.stop_coordinates.lon]).addTo(macarte));
 }
 
 // Voir sur chat gpt si tout s'éxecute bien dans le bon ordre
