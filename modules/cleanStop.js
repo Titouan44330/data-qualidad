@@ -13,7 +13,7 @@ export async function cleanStops(L, macarte) {
 
 // Voir sur chat gpt si tout s'éxecute bien dans le bon ordre
 
-export async function cleanCircuits() {
+export async function cleanCircuits(macarte) {
     let stopsUnclean = await fetchCircuits();
     console.log('les lignes non clean :', stopsUnclean)
     const cleanedData = stopsUnclean.map(item => ({
@@ -32,6 +32,26 @@ export async function cleanCircuits() {
         // console.log(tabToConvert)
         const tabConverted = flatAndSort(tabToConvert);
         cleanedData[index].allStops = tabConverted;
+    });
+
+    cleanedData.forEach((element, index) => {
+        var waypoints = [];
+        for (let i = 1; i+1 < element.allStops.length; i++) {
+            waypoints.push(L.latLng(element.allStops[i][1], element.allStops[i][0]))
+        }
+        function getDarkColor() {
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += Math.floor(Math.random() * 10);
+            }
+            return color;
+        }
+        L.Routing.control({
+            waypoints : waypoints,
+            lineOptions: {
+                styles: [{color: getDarkColor(), opacity: 1, weight: 5}]
+            }
+        }).addTo(macarte);
     });
 
     console.log('liste des lignes :', cleanedData);

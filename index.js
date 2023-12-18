@@ -1,5 +1,6 @@
 import { fetchCircuits, fetchStops } from './modules/appelModule.mjs';
 import { cleanCircuits, cleanStops } from './modules/cleanStop.js';
+
 // Appel a la base
 // fetch('https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_tan-arrets/records?limit=100&route_type=Bus')
 //     .then((response) => response.json())
@@ -18,7 +19,7 @@ initMap()
 let data = fetchCircuits();
 let data2 = fetchStops();
 cleanStops(L, macarte); 
-cleanCircuits();
+cleanCircuits(macarte);
 let dataResult = data.then(
     results => {
         console.log(results)
