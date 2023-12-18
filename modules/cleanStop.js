@@ -1,14 +1,45 @@
 import { fetchStops, fetchCircuits } from "./appelModule.mjs";
 
+var busIcon = L.icon({
+    iconUrl:
+        "https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_charte-graphique-tan/files/c05eb5e694f6d19992e1d181656c7c1a",
+    iconSize: [10, 10],
+    iconAnchor: [10, 10],
+    popupAnchor: [-5, -8],
+});
+
 export async function cleanStops(L, macarte) {
     let stopsUnclean = await fetchStops();
 
     const cleanedData = stopsUnclean.map(item => ({
         stop_id: item.stop_id,
         stop_name: item.stop_name,
-        stop_coordinates: item.stop_coordinates
+        stop_coordinates: item.stop_coordinates,
+        stop_whellchair_boarding: item.wheelchair_boarding
     }));
-    cleanedData.forEach((element) => L.marker([element.stop_coordinates.lat, element.stop_coordinates.lon]).addTo(macarte));
+    
+    cleanedData.forEach((element) => {
+        const marker = L.marker([element.stop_coordinates.lat, element.stop_coordinates.lon], {icon: busIcon})
+            .addTo(macarte)
+            .on('mouseover', function (ev) {
+                console.log(element.stop_whellchair_boarding)
+                if (element.stop_whellchair_boarding != null) {
+                    var imgMobiliteHtml =
+                        '<img src="https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_charte-graphique-tan/files/548aa8788b557dd9827c3f86f9407ba5" alt="Arrêt accsessible au personnes en fauteuil roulant." width="20" height="20"/>';
+                } else {
+                    var imgMobiliteHtml = "";
+                }
+                //console.log("over marker");
+                marker.bindPopup(
+                    "<p>" +
+                        element.stop_name +
+                        imgMobiliteHtml +
+                        '<br /></p><img src="https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_charte-graphique-tan/files/c05eb5e694f6d19992e1d181656c7c1a" alt="Ligne de bus." width="30" height="30" />',
+                    { closeButton: false }
+                );
+                marker.openPopup();
+            });
+    });
 }
 
 // Voir sur chat gpt si tout s'éxecute bien dans le bon ordre
