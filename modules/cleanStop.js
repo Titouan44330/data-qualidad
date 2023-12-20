@@ -1,20 +1,59 @@
 import { fetchStops, fetchCircuits } from "./appelModule.mjs";
 
+const busIcon = L.icon({
+    iconUrl:
+        "https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_charte-graphique-tan/files/c05eb5e694f6d19992e1d181656c7c1a",
+    iconSize: [10, 10],
+    iconAnchor: [10, 10],
+    popupAnchor: [-5, -8],
+});
+
 export async function cleanStops(L, macarte) {
-    let stopsUnclean = await fetchStops();
+    const stopsUnclean = await fetchStops();
 
     const cleanedData = stopsUnclean.map(item => ({
         stop_id: item.stop_id,
         stop_name: item.stop_name,
-        stop_coordinates: item.stop_coordinates
-    }));
-    cleanedData.forEach((element) => L.marker([element.stop_coordinates.lat, element.stop_coordinates.lon]).addTo(macarte));
+        stop_coordinates: item.stop_coordinates,
+        stop_whellchair_boarding: item.wheelchair_boarding
+    }))
+
+    cleanedData.forEach((element) => {
+        const marker = L.marker([element.stop_coordinates.lat, element.stop_coordinates.lon], {icon: busIcon})
+            .addTo(macarte)
+            .on('mouseover', function (ev) {
+                if(element.stop_whellchair_boarding != null)
+                    console.log(element.stop_whellchair_boarding)
+                let imgMobiliteHtml
+                if (element.stop_whellchair_boarding != null) {
+                    imgMobiliteHtml =
+                        '<img src="https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_charte-graphique-tan/files/548aa8788b557dd9827c3f86f9407ba5" alt="Arrêt accsessible au personnes en fauteuil roulant." width="20" height="20"/>';
+                } else {
+                    imgMobiliteHtml = "";
+                }
+                //console.log("over marker");
+                marker.bindPopup(
+                    "<p>" +
+                        element.stop_name +
+                        imgMobiliteHtml +
+                        '<br /></p><img src="https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_charte-graphique-tan/files/c05eb5e694f6d19992e1d181656c7c1a" alt="Ligne de bus." width="30" height="30" />',
+                    { closeButton: false }
+                );
+                marker.openPopup();
+            })
+            .on('mouseout', function (ev) {
+                //console.log("out marker");
+                this.closePopup();
+            });
+    });
 }
 
 // Voir sur chat gpt si tout s'éxecute bien dans le bon ordre
 
 export async function cleanCircuits(macarte) {
-    let stopsUnclean = await fetchCircuits();
+
+    const stopsUnclean = await fetchCircuits();
+    
     console.log('les lignes non clean :', stopsUnclean)
     const cleanedData = stopsUnclean.map(item => ({
         route_id: item.route_id,
@@ -34,14 +73,16 @@ export async function cleanCircuits(macarte) {
         cleanedData[index].allStops = tabConverted;
     });
 
-    cleanedData.forEach((element, index) => {
-        var waypoints = [];
+    cleanedData.forEach((element) => {
+        const waypoints = [];
         for (let i = 1; i+1 < element.allStops.length; i++) {
-            waypoints.push(L.latLng(element.allStops[i][1], element.allStops[i][0]))
+            if(element.route_type != "Tram") {
+                waypoints.push(L.latLng(element.allStops[i][1], element.allStops[i][0]))
+            }
         }
         function getDarkColor() {
-            var color = '#';
-            for (var i = 0; i < 6; i++) {
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
                 color += Math.floor(Math.random() * 10);
             }
             return color;
@@ -50,7 +91,8 @@ export async function cleanCircuits(macarte) {
             waypoints : waypoints,
             lineOptions: {
                 styles: [{color: getDarkColor(), opacity: 1, weight: 5}]
-            }
+            },
+            createMarker: function() { return null; }
         }).addTo(macarte);
     });
 
@@ -58,7 +100,7 @@ export async function cleanCircuits(macarte) {
 }
 
 function flatAndSort(baseArray) {
-    var finalArray;
+    let finalArray;
     // Probablement pas du tout efficace comme methode, ça a l'air de faire pleins d'itérations inutiles
     baseArray.forEach((element, index) => {
         const arretArray = (baseArray.flat());

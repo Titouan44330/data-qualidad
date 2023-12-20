@@ -58,12 +58,12 @@ let dataResult = data.then(
         //     console.log(newArray)
         //console.log(newArray)
 
-        newArray.forEach((element) => L.marker([element[1], element[0]]).addTo(macarte));
+        //newArray.forEach((element) => L.marker([element[1], element[0]]).addTo(macarte));
     });
 
 function flatAndSort(baseArray) {
     //console.log("hello")
-    var finalArray;
+    let finalArray;
 
     // Probablement pas du tout efficace comme methode, ça a l'air de faire pleins d'itérations inutiles
     baseArray.forEach((element, index) => {
@@ -99,6 +99,21 @@ function initMap() {
     }).addTo(macarte);
     //console.log(macarte)
     //var marker = L.marker([lat, lon]).addTo(macarte);
+    //Event Zoom
+    macarte.on("zoomend", function (e) {
+        const iconSize = macarte.getZoom()*macarte.getZoom()*macarte.getZoom()*macarte.getZoom()/2200
+        macarte.eachLayer(function (layer) {
+            if( layer instanceof L.Marker ) {
+                layer.setIcon(L.icon({
+                    iconUrl:
+                        "https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/244400404_charte-graphique-tan/files/c05eb5e694f6d19992e1d181656c7c1a",
+                    iconSize: [iconSize, iconSize],
+                    iconAnchor: [iconSize, iconSize],
+                    popupAnchor: [-iconSize*0.5, -iconSize*0.9],
+                }));
+               }
+        });
+    });
 };
 
 // Load la page
